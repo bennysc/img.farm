@@ -14,24 +14,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var key = os.Getenv("SPACES_KEY")
+var secret = os.Getenv("SPACES_SECRET")
+
+var s3Config = &aws.Config{
+	Credentials: credentials.NewStaticCredentials(key, secret, ""),
+	Endpoint:    aws.String("https://nyc3.digitaloceanspaces.com"),
+	Region:      aws.String("us-east-1"),
+}
+
+var newSession, s3Err = session.NewSession(s3Config)
+var s3Client = s3.New(newSession)
+
 func main() {
 
-	key := os.Getenv("SPACES_KEY")
-	secret := os.Getenv("SPACES_SECRET")
-
-	s3Config := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(key, secret, ""),
-		Endpoint:    aws.String("https://nyc3.digitaloceanspaces.com"),
-		Region:      aws.String("us-east-1"),
+	if s3Err != nil {
+		fmt.Printf(s3Err.Error())
 	}
 
-	newSession := session.New(s3Config)
-	s3Client := s3.New(newSession)
-
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/upload", Upload)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -39,5 +47,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Upload page")
+	spaces, err := s3Client.ListBuckets(nil)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	for _, b := range spaces.Buckets {
+		fmt.Fprintf(w, aws.StringValue(b.Name)+"\n")
+	}
 }

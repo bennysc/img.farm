@@ -1,0 +1,8 @@
+name: img.farm
+services:
+- dockerfile_path: Dockerfile
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: bennysc/img.farm
+  name: img.farm

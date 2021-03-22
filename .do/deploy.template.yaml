@@ -1,0 +1,9 @@
+  
+spec:
+  name: img.farm
+  services:
+  - dockerfile_path: Dockerfile
+    git:
+      branch: main
+      repo_clone_url: https://github.com/bennysc/img.farm.git
+    name: img.farm
