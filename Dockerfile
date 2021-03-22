@@ -2,7 +2,7 @@ FROM golang:1.12-alpine as builder
 WORKDIR /app
 
 COPY . .
-RUN go build -mod=vendor -o bin/
+RUN go build -o bin/
 
 FROM alpine
 
