@@ -2,6 +2,9 @@ FROM golang:1.12-alpine as builder
 WORKDIR /app
 
 COPY . .
+
+RUN apk add git
+
 RUN go build -o bin/
 
 FROM alpine
