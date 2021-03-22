@@ -5,7 +5,7 @@ COPY . .
 
 RUN apk add git
 
-RUN go build -o bin/
+RUN go build -o bin/img.farm
 
 FROM alpine
 
